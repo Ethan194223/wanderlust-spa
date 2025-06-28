@@ -1,21 +1,24 @@
 // src/hooks/useAuth.ts
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 
 type User = { email: string };
-type AuthCtx = {
+
+type AuthContextType = {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => void;
 };
 
-const Ctx = createContext<AuthCtx>(null!);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+/** Wrap your app with this in main.tsx */
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() =>
     localStorage.getItem('token') ? { email: 'placeholder' } : null,
   );
 
+  /** hit /auth/login and stash JWT */
   async function login(email: string, password: string) {
     const res = await fetch('/auth/login', {
       method: 'POST',
@@ -27,13 +30,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser({ email });
   }
 
+  /** /auth/register then auto-login */
   async function register(email: string, password: string) {
     await fetch('/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    // auto-login for convenience
     await login(email, password);
   }
 
@@ -42,7 +45,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   }
 
-  return <Ctx.Provider value={{ user, login, register, logout }}>{children}</Ctx.Provider>;
-};
+  const value = { user, login, register, logout };
 
-export const useAuth = () => useContext(Ctx);
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+/** Hook other components call */
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used inside <AuthProvider>');
+  return ctx;
+}
