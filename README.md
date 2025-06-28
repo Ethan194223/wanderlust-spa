@@ -17,3 +17,4 @@ React 18, TypeScript, Vite 7, pnpm, Tailwind CSS …
 pnpm i
 pnpm dev
 
+## Code owners
