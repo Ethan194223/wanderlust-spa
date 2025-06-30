@@ -3,7 +3,10 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { getHotels, type Hotel } from '@/services/hotelService';
-import SkeletonCard from '@/components/SkeletonCard';   // ← NEW
+import { formatPrice } from '@/utils/formatPrice';
+import SkeletonCard from '@/components/SkeletonCard';
+
+const DEFAULT_CURRENCY = 'HKD';   // ← change here if you want another default
 
 /* ───────────────────────────────────────────
    Component
@@ -41,10 +44,8 @@ export default function HotelList() {
         </p>
       )}
 
-      {/* Empty-result state (only after loading completes) */}
-      {!loading && hotels.length === 0 && !error && (
-        <p>No hotels found.</p>
-      )}
+      {/* Empty-result state */}
+      {!loading && hotels.length === 0 && !error && <p>No hotels found.</p>}
 
       {/* Skeletons OR real cards */}
       {(loading || hotels.length > 0) && (
@@ -79,12 +80,14 @@ export default function HotelList() {
                   <h2 className="text-xl font-semibold mb-1 truncate">
                     {hotel.name}
                   </h2>
-                  <p className="text-sm text-gray-600 flex-1">{hotel.city}</p>
+                  <p className="text-sm text-gray-600 flex-1">
+                    {hotel.city}
+                  </p>
 
                   <p className="mt-2 font-medium">
                     {hotel.price != null ? (
                       <>
-                        HK${hotel.price.toLocaleString()}
+                        {formatPrice(hotel.price, DEFAULT_CURRENCY)}
                         <span className="text-sm font-normal"> / night</span>
                       </>
                     ) : (
