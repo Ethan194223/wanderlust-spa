@@ -1,22 +1,15 @@
-// vite.config.ts
+// vite.config.ts  – project root
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { fileURLToPath, URL } from 'node:url';
 
-// --------------------------------------------------
-// Vite dev-server settings
-// --------------------------------------------------
-//  ▸ Any request whose path starts with /auth or /hotels
-//    is transparently proxied to http://localhost:3000.
-//  ▸ When you add more API prefixes later (e.g. /profile),
-//    just append another key: '/profile': 'http://localhost:3000'
-//
 export default defineConfig({
   plugins: [react()],
-  server: {
-    proxy: {
-      '/auth':   'http://localhost:3000',
-      '/hotels': 'http://localhost:3000',
-      // '/profile': 'http://localhost:3000',   // <-- add when needed
+  resolve: {
+    alias: {
+      //  @/…  ➜  /absolute/path/to/src/…
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
 });
+

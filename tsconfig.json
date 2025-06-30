@@ -1,5 +1,16 @@
+// tsconfig.json  (project root)
 {
+  "compilerOptions": {
+    // ⬇️  makes all imports resolve relative to /src
+    "baseUrl": "./src",
+    // ⬇️  allows `@/utils/api` ➜ src/utils/api
+    "paths": {
+      "@/*": ["*"]
+    }
+  },
+
   "files": [],
+
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }

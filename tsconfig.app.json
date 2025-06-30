@@ -1,11 +1,14 @@
 {
+  // ⬅️  inherit baseUrl + paths + anything else from the root
+  "extends": "./tsconfig.json",
+
   "compilerOptions": {
+    // keep the app-specific flags you already had
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "ES2022",
     "useDefineForClassFields": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "skipLibCheck": true,
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -23,5 +26,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
+
   "include": ["src"]
 }
+
