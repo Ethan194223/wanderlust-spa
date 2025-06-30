@@ -1,8 +1,15 @@
 // src/routes/ProtectedRoute.tsx
-import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+// src/routes/ProtectedRoute.tsx
+import { Navigate } from 'react-router-dom';
+import type { ReactElement } from 'react';   // 👈 type-only import fixes TS1484
+import useAuth from '../hooks/useAuth';
 
-export default function ProtectedRoute() {
-  const { user } = useAuth();
-  return user ? <Outlet /> : <Navigate to="/login" replace />;
+interface ProtectedRouteProps {
+  children: ReactElement;
 }
+
+export default function ProtectedRoute({ children }: ProtectedRouteProps) {
+  const { user } = useAuth();               // or const { token } = useAuth();
+  return user ? children : <Navigate to="/login" replace />;
+}
+

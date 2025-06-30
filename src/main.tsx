@@ -3,36 +3,39 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-// ⬇️  Auth provider (adjust import path if yours differs)
 import { AuthProvider } from './hooks/useAuth';
 
-// Pages
-import Login      from './pages/Login';
+// pages
+import Login      from './pages/Auth/Login';
 import Register   from './pages/Register';
-import Dashboard  from './pages/Dashboard';
-import Hotels     from './pages/Hotels';         // ⬅️ new import
+import Dashboard  from './pages/Operator/Dashboard';
+import HotelList  from './pages/HotelList';      // ← fixed path
 
-// Route guards
+// route guard
 import ProtectedRoute from './routes/ProtectedRoute';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
+    <AuthProvider>
+      <BrowserRouter>
         <Routes>
-          {/* Public routes */}
+          {/* public */}
           <Route path="/login"    element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/hotels"   element={<Hotels />} />   {/* ⬅️ public catalogue */}
+          <Route path="/hotels"   element={<HotelList />} />
 
-          {/* Protected routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/" element={<Dashboard />} />
-            {/* Or: <Route index element={<Dashboard />} /> if you nest paths differently */}
-          </Route>
+          {/* protected */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
-      </AuthProvider>
-    </BrowserRouter>
-  </React.StrictMode>,
+      </BrowserRouter>
+    </AuthProvider>
+  </React.StrictMode>
 );
 
