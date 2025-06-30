@@ -1,35 +1,65 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// src/App.tsx
+// ---------------------------------------------------------------
+// Quick sanity-check: confirm Vite picked up your env variable
+console.log('API base =', import.meta.env.VITE_API_BASE);
+// ---------------------------------------------------------------
 
-function App() {
-  const [count, setCount] = useState(0)
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+import { AuthProvider }  from '@/hooks/useAuth';
+import ProtectedRoute    from '@/routes/ProtectedRoute';
+
+/* 🆕  Navbar */
+import Navbar            from '@/components/Navbar';
+
+/* Pages */
+import HotelList         from '@/pages/HotelList';
+import Login             from '@/pages/Auth/Login';
+import Register          from '@/pages/Register';
+import Dashboard         from '@/Dashboard';        // “Welcome …” screen
+
+/* Temporary placeholder until you build the real operator dashboard */
+function OperatorDashboard() {
+  return <div style={{ padding: '2rem' }}>Operator dashboard — TODO</div>;
 }
 
-export default App
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        {/* ────── Site-wide layout wrapper ────── */}
+        <div className="flex min-h-screen flex-col">
+          <Navbar />                            {/* ⬅️  ← HERE */}
+
+          <main className="flex-1">
+            <Routes>
+              {/* ───────── Public routes ───────── */}
+              <Route index element={<HotelList />} />           {/* / */}
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/login"     element={<Login />} />
+              <Route path="/register"  element={<Register />} />
+
+              {/* ───────── Operator-only area ───────── */}
+              <Route
+                path="/operator/*"
+                element={
+                  <ProtectedRoute>
+                    <OperatorDashboard />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* ───────── Catch-all: redirect home ───────── */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </main>
+        </div>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}

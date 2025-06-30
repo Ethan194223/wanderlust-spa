@@ -1,10 +1,14 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
+// src/main.tsx
+import './index.css';            // ①  must come first so Tailwind styles load
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';         // App already wraps AuthProvider + Router
+
+ReactDOM.createRoot(
+  document.getElementById('root') as HTMLElement,
+).render(
+  <React.StrictMode>
     <App />
-  </StrictMode>,
-)
+  </React.StrictMode>,
+);
