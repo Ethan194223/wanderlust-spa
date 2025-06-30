@@ -1,24 +1,28 @@
-// src/pages/Register.tsx
+// src/pages/Auth/Register.tsx
 import { Link, useNavigate } from 'react-router-dom';
-import useAuth       from '@/hooks/useAuth';      // default import – no braces
-import AuthForm      from '@/components/AuthForm';
+import useAuth               from '@/hooks/useAuth';
+import AuthForm              from '@/components/AuthForm';
 
+/**
+ * Register Page
+ * ────────────────────────────────────────────────
+ * Re-uses <AuthForm /> to gather email + password.
+ * Derives a quick display-name from the email prefix.
+ */
 export default function Register() {
   const { register } = useAuth();
-  const nav = useNavigate();
+  const nav          = useNavigate();
 
   return (
-    <>
-      <h1 className="text-2xl text-center mt-8">Register</h1>
+    <main className="max-w-sm mx-auto mt-10">
+      <h1 className="text-3xl font-bold text-center">Register</h1>
 
       <AuthForm
         submitLabel="Create account"
         onSubmit={async (email, password) => {
-          // quick display-name taken from mailbox part
-          const name = email.split('@')[0];
-
-          await register(email, password, name); // ← 3 args now
-          nav('/');                              // go to dashboard
+          const name = email.split('@')[0]; // simple default display-name
+          await register(email, password, name);
+          nav('/');                         // go to hotel list on success
         }}
       />
 
@@ -28,7 +32,7 @@ export default function Register() {
           Log&nbsp;in
         </Link>
       </p>
-    </>
+    </main>
   );
 }
 

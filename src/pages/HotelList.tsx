@@ -1,64 +1,109 @@
 // src/pages/HotelList.tsx
-// src/pages/HotelList.tsx
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import type { AxiosError, AxiosResponse } from 'axios';   // ← add “type”
-import api from '@/utils/api';
 
+import { getHotels, type Hotel } from '@/services/hotelService';
+import SkeletonCard from '@/components/SkeletonCard';   // ← NEW
 
-export interface Hotel {
-  id: string;
-  name: string;
-  city: string;
-  price: number;      // nightly price
-  imageUrl?: string;  // optional hero photo
-}
-
+/* ───────────────────────────────────────────
+   Component
+─────────────────────────────────────────── */
 export default function HotelList() {
   const [hotels, setHotels]   = useState<Hotel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState<string | null>(null);
 
+  /* Fetch once on mount */
   useEffect(() => {
-    api
-      .get<Hotel[]>('/hotels')
-      .then((res: AxiosResponse<Hotel[]>) => setHotels(res.data))
-      .catch(
-        (err: AxiosError<{ msg?: string }>) =>
-          setError(err.response?.data?.msg ?? err.message),
-      )
-      .finally(() => setLoading(false));
+    const controller = new AbortController();
+
+    getHotels()
+      .then(setHotels)
+      .catch(err => {
+        if (!controller.signal.aborted) setError(err.message);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+
+    return () => controller.abort();
   }, []);
 
-  if (loading) return <p className="text-center mt-10">Loading hotels…</p>;
-  if (error)   return <p className="text-center mt-10 text-red-600">{error}</p>;
-
+  /* ───── UI ───── */
   return (
-    <div className="mx-auto max-w-6xl p-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      {hotels.map(hotel => (
-        <article
-          key={hotel.id}
-          className="rounded-2xl shadow hover:shadow-lg transition p-4 flex flex-col"
+    <main className="mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Available Hotels</h1>
+
+      {/* Error state */}
+      {error && (
+        <p className="text-center mt-10 text-red-600" role="alert">
+          {error}
+        </p>
+      )}
+
+      {/* Empty-result state (only after loading completes) */}
+      {!loading && hotels.length === 0 && !error && (
+        <p>No hotels found.</p>
+      )}
+
+      {/* Skeletons OR real cards */}
+      {(loading || hotels.length > 0) && (
+        <div
+          className="
+            grid gap-6 justify-items-center
+            sm:grid-cols-2
+            lg:grid-cols-3
+            xl:grid-cols-4
+            2xl:grid-cols-5
+          "
         >
-          <img
-            src={hotel.imageUrl ?? '/placeholder.jpg'}
-            alt={hotel.name}
-            className="h-40 w-full object-cover rounded-xl mb-4"
-          />
-          <h2 className="text-xl font-semibold mb-1">{hotel.name}</h2>
-          <p className="text-sm text-gray-600 flex-1">{hotel.city}</p>
-          <p className="mt-2 font-medium">
-            HK${hotel.price.toLocaleString()}
-            <span className="text-sm font-normal"> / night</span>
-          </p>
-          <Link
-            to={`/hotels/${hotel.id}`}
-            className="mt-4 inline-block text-blue-600 underline self-start"
-          >
-            View details →
-          </Link>
-        </article>
-      ))}
-    </div>
+          {loading
+            ? Array.from({ length: 8 }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))
+            : hotels.map(hotel => (
+                <article
+                  key={hotel.id}
+                  className="
+                    rounded-2xl shadow hover:shadow-lg transition p-4
+                    flex flex-col bg-white
+                  "
+                >
+                  <img
+                    src={hotel.imageUrl ?? '/placeholder.jpg'}
+                    alt={hotel.name}
+                    className="h-40 w-full object-cover rounded-xl mb-4"
+                    loading="lazy"
+                  />
+
+                  <h2 className="text-xl font-semibold mb-1 truncate">
+                    {hotel.name}
+                  </h2>
+                  <p className="text-sm text-gray-600 flex-1">{hotel.city}</p>
+
+                  <p className="mt-2 font-medium">
+                    {hotel.price != null ? (
+                      <>
+                        HK${hotel.price.toLocaleString()}
+                        <span className="text-sm font-normal"> / night</span>
+                      </>
+                    ) : (
+                      <span className="italic text-gray-500">
+                        Price on request
+                      </span>
+                    )}
+                  </p>
+
+                  <Link
+                    to={`/hotels/${hotel.id}`}
+                    className="mt-4 inline-block text-blue-600 underline self-start"
+                  >
+                    View details →
+                  </Link>
+                </article>
+              ))}
+        </div>
+      )}
+    </main>
   );
 }
