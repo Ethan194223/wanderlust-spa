@@ -3,13 +3,16 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-// ⬅️  If you put AuthProvider inside hooks/useAuth.ts, import from there.
-//     If you created src/context/AuthContext.tsx, change the path accordingly.
+// ⬇️  Auth provider (adjust import path if yours differs)
 import { AuthProvider } from './hooks/useAuth';
 
+// Pages
 import Login      from './pages/Login';
 import Register   from './pages/Register';
 import Dashboard  from './pages/Dashboard';
+import Hotels     from './pages/Hotels';         // ⬅️ new import
+
+// Route guards
 import ProtectedRoute from './routes/ProtectedRoute';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -17,16 +20,19 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <AuthProvider>
         <Routes>
+          {/* Public routes */}
           <Route path="/login"    element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/hotels"   element={<Hotels />} />   {/* ⬅️ public catalogue */}
 
-          {/* Anything below is gated by <ProtectedRoute /> */}
+          {/* Protected routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Dashboard />} />
-            {/* or use <Route index element={<Dashboard />} /> if you move the path to the wrapper */}
+            {/* Or: <Route index element={<Dashboard />} /> if you nest paths differently */}
           </Route>
         </Routes>
       </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>,
 );
+
